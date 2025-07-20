@@ -2,6 +2,8 @@
 
 This repository contains the course materials for Socio-Informatics 348: Computational Social Science, offered at Stellenbosch University in 2025.
 
+Link to [SocSciLearn](https://socscilearn.sun.ac.za/course/view.php?id=2101)
+
 ### Course Framework and Study Guide
 Click [here](2025_mf_si348.pdf) to view the course framework.\
 Click [here](SI_348_outline_2025_students.pdf) to view the study guide.

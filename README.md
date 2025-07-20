@@ -10,4 +10,4 @@ Click [here](SI_348_outline_2025_students.pdf) to view the study guide.
 
 ### Course Materials
 - **Lecture Slides**: Lecture slides will be made available in the `slides` directory before classes.
-- **Practice Exercises**: Practice exercises will be provided in the `pracs` directory. These are designed to help you apply the concepts introduced in lectures.
+- **Practicals**: Practical exercises will be provided in the `pracs` directory. These are designed to help you apply the concepts introduced in lectures.

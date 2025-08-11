@@ -126,16 +126,19 @@ flights |>
 # select() -------------------------
 # Often you may only need some of the columns in a data frame
 flights |> 
-  select(year, month, day)
+  select(year, month, day) # specify exact columns
 
 flights |> 
-  select(year:day)
+  select(year:day) # specify a range between 2 column names
 
 flights |> 
-  select(!year:day)
+  select(!year:day) # drop a range of columns
 
 flights |> 
   select(where(is.character))
+
+flights |> 
+  select(where(is.numeric))
 
 # flights |> 
 #   select(starts_with("arr"))

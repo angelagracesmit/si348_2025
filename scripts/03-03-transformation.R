@@ -8,7 +8,7 @@ library(nycflights13) # data we are using
 
 # Viewing your data ------------------
 glimpse(flights)
-view(flights)
+# view(flights)
 
 # Dplyr basics -----------------------
 # Structure:
@@ -20,9 +20,19 @@ view(flights)
 flights |>
   filter(dest == "IAH") |> 
   group_by(year, month, day) |> 
-  summarize(
+  summarize( # reduces data frame to a single summary stat per group
     arr_delay = mean(arr_delay, na.rm = TRUE)
   )
+
+# output to new data frame by assigning it using <- 
+flight_delays <- flights |>
+  filter(dest == "IAH") |> 
+  group_by(year, month, day) |> 
+  summarize( # reduces data frame to a single summary stat per group
+    arr_delay = mean(arr_delay, na.rm = TRUE)
+  )
+
+view(flight_delays)
 
 # Rows ------------------------------
 # filter, arrange, distinct
@@ -31,12 +41,15 @@ flights |>
 flights |> 
   filter(dep_delay > 120) # also <, >=, <=, ==, !=
 
+# ! is used in this way in other cases too!
+sum(!is.na(flights$dep_delay))
+
 # AND: Flights that departed on January 1
 flights |> 
-  filter(month == 1 & day == 1)
+  filter(month == 12 & day == 25)
 
 # OR: Flights that departed in January or February
-flights |> 
+jan_feb_flights <- flights |> 
   filter(month == 1 | month == 2)
 
 # NOTE: A shorter way to select multiple conditions with OR
@@ -54,7 +67,7 @@ flights |>
   arrange(year, month, day, dep_time)
 
 # by default - orders in ascending order 
-flights |> 
+delay_order <- flights |> 
   arrange(desc(dep_delay)) # make it descending order
 
 # distinct() -----------------------
@@ -80,7 +93,14 @@ flights |>
     speed = distance / (air_time / 60)
   )
 
-# where to place your new variable
+# don't overwrite unless you are sure
+flights <- flights |> 
+  mutate(
+    # air_time = air_time / 60
+    air_time_hrs = air_time / 60
+  )
+
+# where to place your new variable, by default it gets added to the end
 flights |> 
   mutate(
     gain = dep_delay - arr_delay,
@@ -117,6 +137,9 @@ flights |>
 flights |> 
   select(where(is.character))
 
+# flights |> 
+#   select(starts_with("arr"))
+
 # also:
 # starts_with("abc"): matches column names that begin with “abc”
 # ends_with("xyz"): matches names that end with “xyz”
@@ -138,3 +161,44 @@ flights |>
 flights |> 
   relocate(starts_with("arr"), .before = dep_time)
 
+# Groups --------------------------
+# group_by, summarize, slice
+
+# group_by() -------------------------
+flights |> 
+  group_by(month)
+
+# summarize() -----------------------
+flights |> 
+  group_by(month) |> 
+  summarize(
+    avg_delay = mean(dep_delay, na.rm = TRUE)
+  )
+
+# include as many summary variables as needed
+flights |> 
+  group_by(month) |> 
+  summarize(
+    avg_delay = mean(dep_delay, na.rm = TRUE), 
+    n = n()
+  )
+
+# slice functions
+# df |> slice(1:20) returns the first 20 rows.
+# for groups:
+# df |> slice_head(n = 1) takes the first row from each group.
+# df |> slice_tail(n = 1) takes the last row in each group.
+# df |> slice_min(x, n = 1) takes the row with the smallest value of column x.
+# df |> slice_max(x, n = 1) takes the row with the largest value of column x.
+# df |> slice_sample(n = 1) takes one random row.
+# NOTE:
+# You can vary n to select more than one row, 
+# or instead of n =, you can use prop = 0.1 to select (e.g.) 10% of the rows in each group.
+
+flights |> 
+  group_by(dest) |> 
+  slice_max(arr_delay, n = 1) # will give back one row for each destination with the maximum arrival delay
+
+# ungrouping
+flights |> 
+  ungroup()

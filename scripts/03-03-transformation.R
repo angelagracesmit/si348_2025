@@ -140,8 +140,8 @@ flights |>
 flights |> 
   select(where(is.numeric))
 
-# flights |> 
-#   select(starts_with("arr"))
+flights |> 
+   select(starts_with("arr"))
 
 # also:
 # starts_with("abc"): matches column names that begin with “abc”
@@ -201,6 +201,12 @@ flights |>
 flights |> 
   group_by(dest) |> 
   slice_max(arr_delay, n = 1) # will give back one row for each destination with the maximum arrival delay
+
+
+flights |> 
+  group_by(dest) |> 
+  slice_min(dep_delay, n = 1) # will give back one row for each destination with the minimum departure delay
+
 
 # ungrouping
 flights |> 

@@ -1,0 +1,165 @@
+---
+title: "Practical 1"
+format: html
+editor: visual
+---
+
+## Setup/Preamble
+
+```{r}
+#| warning: false
+library(tidyverse)
+library(palmerpenguins)
+library(nycflights13)
+```
+
+## Section 1
+
+Question 1
+
+```{r}
+glimpse(penguins)
+```
+
+Rows: 344 Columns: 8
+
+Question 2
+
+```{r}
+ggplot(penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +
+  geom_point()
+```
+
+Question 3
+
+```{r}
+ggplot(penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +   
+  geom_point() +
+  labs(
+    caption = "Data come from the palmerpenguins package."
+  )
+```
+
+Question 4
+
+```{r}
+ggplot(penguins, aes(x = species, y = bill_depth_mm)) +   
+  geom_point()
+```
+
+A better geom to use would be a boxplot.
+
+Question 5
+
+```{r}
+ggplot(penguins, aes(x = species, y = bill_depth_mm)) +   
+  geom_boxplot()
+```
+
+Question 6
+
+```{r}
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) +   
+  geom_point(aes(color = bill_depth_mm), size = 3) +
+  geom_smooth() # method = 'loess' by default
+```
+
+## Section 2
+
+Question 7
+
+It is a good idea to understand the range of values of `carat` before choosing bin sizes.
+
+```{r}
+diamonds |>
+  summary() # for the whole data frame
+
+summary(diamonds$carat) # for just the single column
+```
+
+Given that `carat` ranges from 0.20 to 5.01, lets use 0.01, 0.10 and 1 as bin widths.
+
+```{r}
+ggplot(diamonds, aes(x = carat)) +   
+  geom_histogram(binwidth = 0.1) # adjust bin width and re-run.
+```
+
+## Section 3
+
+Question 8
+
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy)) +      
+  geom_point()
+```
+
+Numerical variable chosen is `cty` (city mileage).
+
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy, color = cty)) +      
+  geom_point()
+```
+
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy, size = cty)) +      
+  geom_point()
+```
+
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy, color = cty, size = cty)) +      
+  geom_point()
+```
+
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy, color = cty, size = cty, shape = drv)) +   
+  geom_point()
+```
+
+The difference is a numerical variable doesn’t work with the shape aesthetic but a categorical variable does.
+
+## Section 4
+
+Question 9
+
+```{r}
+# Had an arrival delay of two or more hours
+flights |>
+  filter(arr_delay >= 120) |>
+  arrange(desc(arr_delay))
+
+# Went to Houston (IAH or HOU)
+flights |>
+  filter(dest %in% c("IAH", "HOU"))
+
+# Were operated by United, American, or Delta
+flights |>
+  filter(carrier %in% c("UA", "DL", "AA"))
+
+# Departed in July, August, or September
+flights |>
+  filter(month %in% c(7, 8, 9))
+
+# Arrived 2+ hours late, but left on time
+flights |> 
+  filter(arr_delay >= 120 & dep_delay <= 0)
+
+# Were delayed by at least 1 hour, but gained over 30 mins in air
+flights |> 
+  filter(dep_delay >= 60 & dep_delay - arr_delay > 30)
+```
+
+Question 10 Yes, there was a flight on every day of 2013 since there are 365 distinct combinations of year, month, and day, which is equal to the number of days in the year 2013.
+
+```{r}
+flights |> 
+  distinct(year, month, day) |>
+  nrow()
+```
+
+Question 11
+
+```{r}
+flights |> 
+  arrange(desc(distance)) |> # arranging distance largest to smallest
+  relocate(distance) # optional line
+```

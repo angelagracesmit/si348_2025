@@ -12,6 +12,7 @@ Click [here](SI_348_outline_2025_students.pdf) to view the study guide.
 - **Lecture Slides**: Lecture slides will be made available in the `slides` directory.
 - **Lecture Scripts**: Lecture scripts will be made available in the `scripts` directory.
 - **Practicals**: Practical exercises will be provided in the `pracs` directory. These are designed to help you apply the concepts introduced in lectures.
+- **Practical Solutions**: Practical solutions will be provided in the `prac-solutions` directory. 
 
 Textbooks we will use:
 - **R for Data Science** (2nd ed), Wickham et al. https://r4ds.hadley.nz

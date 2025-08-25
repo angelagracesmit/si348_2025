@@ -1,0 +1,160 @@
+---
+title: "Practical 2"
+format: html
+editor: visual
+---
+
+## Setup/Preamble
+
+```{r}
+#| warning: false
+library(tidyverse)
+library(nycflights13)
+```
+
+## Section 1
+
+Question 1
+
+You get the variable just once.
+
+```{r}
+flights |> 
+  select(dep_time, dep_time)
+```
+
+Question 2
+
+This doesn’t work because the result of the [`select()`](https://dplyr.tidyverse.org/reference/select.html) step is a data frame with only the `tailnum` variable, so it’s not possible to arrange it by another variable, `arr_delay`.
+
+Question 3
+
+Flights that traveled the farthest distance:
+
+```{r}
+flights |> 
+  arrange(desc(distance)) |>
+  relocate(distance)
+```
+
+Flights that traveled the shortest distance:
+
+```{r}
+flights |> 
+  arrange(distance) |>
+  relocate(distance)
+```
+
+Question 4
+
+The variable names are lowercase but the string in [`contains()`](https://tidyselect.r-lib.org/reference/starts_with.html) is uppercase. By default, [`contains()`](https://tidyselect.r-lib.org/reference/starts_with.html) ignores case.
+
+```{r}
+flights |> 
+  select(contains("TIME"))
+
+flights |> 
+  select(contains("TIME", ignore.case = FALSE))
+```
+
+Question 5
+
+Over the course of the day, hourly average departure delay increases until about 7pm, and then declines again.
+
+```{r}
+hourly <- flights |>
+  group_by(hour) |>
+  summarize(avg_dep_delay = mean(dep_delay, na.rm = TRUE))
+
+ggplot(hourly, aes(x = hour, y = avg_dep_delay)) + 
+  geom_smooth()
+```
+
+Question 6
+
+Fastest flights, using miles per hour.
+
+```{r}
+flights |> 
+  mutate(speed = distance / (air_time / 60)) |>
+  arrange(desc(speed)) |>
+  relocate(speed)
+```
+
+Question 7
+
+F9 (Frontier Airlines) has the worst average delays.
+
+```{r}
+flights |>
+  group_by(carrier) |>
+  summarize(avg_dep_delay = mean(dep_delay, na.rm = TRUE)) |>
+  arrange(desc(avg_dep_delay))
+```
+
+## Section 2
+
+Question 8
+
+For `table2`, we need to reshape the data to have a column for cases and a column for population and then divide the two to calculate the rate. A possible approach is shown below.
+
+```{r}
+table2 |>
+  pivot_wider(
+    names_from = type,
+    values_from = count
+  ) |> 
+  mutate(rate = cases / population * 10000)
+```
+
+For `table3`, we need to separate cases and population into their own columns and then divide them. A possible approach is shown below.
+
+```{r}
+table3 |>
+  separate_wider_delim(
+    cols = rate, 
+    delim = "/", 
+    names = c("cases", "population"),
+  ) |>
+  mutate(
+    cases = as.numeric(cases),
+    population = as.numeric(population),
+    rate = cases / population * 10000
+  )
+```
+
+## Section 3
+
+Question 9
+
+```{r}
+annoying <- tibble(
+    `1` = 1:10,
+    `2` = `1` * 2 + rnorm(length(`1`))
+)
+```
+
+```{r}
+annoying |>
+  select(`1`)
+```
+
+```{r}
+ggplot(annoying, aes(x = `2`, y = `1`)) +
+  geom_point()
+```
+
+```{r}
+annoying |>
+  mutate(`3` = `2` / `1`)
+```
+
+```{r}
+annoying |>
+  mutate(`3` = `2` / `1`) |>
+  rename(
+    "one" = `1`,
+    "two" = `2`,
+    "three" = `3`
+  )
+```

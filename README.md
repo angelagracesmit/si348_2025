@@ -19,3 +19,7 @@ Textbooks we will use:
 - **Bit by Bit**, Salganik. https://bitbybitbook.com
 - **Text Mining with R**, Silge & Robinson. https://www.tidytextmining.com
 - **Computational Communication**, van Atteveldt et al. https://cssbook.net
+
+Other useful sources:
+- **ggplot2: Elegant Graphics for Data Analysis**: https://ggplot2-book.org/
+- **R Graphics Cookbook**: https://r-graphics.org/

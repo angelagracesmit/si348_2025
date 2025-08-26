@@ -23,3 +23,5 @@ Textbooks we will use:
 Other useful sources:
 - **ggplot2: Elegant Graphics for Data Analysis**: https://ggplot2-book.org/
 - **R Graphics Cookbook**: https://r-graphics.org/
+- **R Graph Gallery**: https://www.r-graph-gallery.com/
+- **Posit Cheatsheets**: https://posit.co/resources/cheatsheets/

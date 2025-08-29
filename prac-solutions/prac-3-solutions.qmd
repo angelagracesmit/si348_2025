@@ -1,0 +1,162 @@
+---
+title: "Practical 3"
+format: html
+editor: visual
+---
+
+## Setup/Preamble
+
+```{r}
+#| warning: false
+library(tidyverse)
+```
+
+## Section 1
+
+Question 1
+
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(color = "pink", shape = 17)
+# note that because color and shape are set as constant values,
+# they are set outside of the mapping aesthetics
+```
+
+Question 2
+
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+```
+
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth(se = FALSE, aes(group = drv))
+```
+
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy, color = drv)) +
+  geom_point() +
+  geom_smooth(se = FALSE, aes(group = drv))
+```
+
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(aes(color = drv)) +
+  geom_smooth(se = FALSE)
+```
+
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(aes(color = drv)) +
+  geom_smooth(se = FALSE, aes(group = drv, linetype = drv))
+```
+
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(color = "black", size = 4) +
+  geom_point(aes(color = drv)) 
+```
+
+## Section 2
+
+Question 3
+
+```{r}
+ggplot(diamonds, aes(x = "", fill = cut)) +
+  geom_bar()
+
+ggplot(diamonds, aes(x = "", fill = cut)) +
+  geom_bar() + 
+  coord_polar(theta = "y")
+```
+
+Question 4
+
+```{r}
+ggplot(diamonds, aes(x= cut, y = price, color = cut)) +
+  geom_violin()
+```
+
+```{r}
+ggplot(diamonds, aes(x= price, color = cut)) +
+  geom_histogram() +
+  facet_wrap(~cut)
+```
+
+```{r}
+ggplot(diamonds, aes(x= price, color = cut)) +
+  geom_freqpoly()
+```
+
+```{r}
+ggplot(diamonds, aes(x= price, color = cut)) +
+  geom_density()
+```
+
+Question 5
+
+For histograms, missing values are removed when the number of observations in each bin are calculated. You will get the following warning message: `Removed 9 rows containing non-finite values (stat_bin).`
+
+In the `geom_bar()` function, the `x` aesthetic requires a categorical variable, and `NA` values are treated as another category.
+
+Question 6
+
+Create a boxplot by binning `carat`.
+
+```{r}
+ggplot(data = diamonds, mapping = aes(x = carat, y = price)) +
+  geom_boxplot(mapping = aes(group = cut_width(carat, 0.1)))
+```
+
+The variables `color` and `clarity` are ordered categorical variables, so use a boxplot for these plots.
+
+The scale of diamond color goes from D (best) to J (worst), but these levels of `diamonds$color` are currently in the wrong order. Before plotting, reverse the order of the `color` levels so they will be in increasing order of quality on the x-axis.
+
+```{r}
+diamonds %>%
+  mutate(color = fct_rev(color)) %>% # reverse the factor order
+  ggplot(aes(x = color, y = price)) +
+  geom_boxplot()
+```
+
+There is a weak negative relationship between `color` and `price`.
+
+```{r}
+ggplot(data = diamonds) +
+  geom_boxplot(mapping = aes(x = clarity, y = price))
+```
+
+There is also weak negative relationship between `clarity` and `price`. For both `clarity` and `color`, there is a much larger amount of variation **within** each category than **between** categories. This is different when we look at the plot for `carat`. `carat` is clearly the single best predictor of diamond prices.
+
+What is the relationship between `carat` and `cut`? Since this is one categorical variable and one continuous variable, we can use a boxplot.
+
+```{r}
+ggplot(diamonds, aes(x = cut, y = carat)) +
+  geom_boxplot()
+```
+
+There is a lot of variation in the distribution of `carat` sizes **within** each `cut` category. The plot reveals a slight negative relationship between carat and cut. It appears very similar to the original plot of `price` vs `cut`. Importantly, the largest carat diamonds have a cut of “Fair” (the lowest).
+
+In the diamond market, larger diamonds can be profitably sold with a lower quality cut, while a smaller diamond would require a better cut to be sold at a better price.
+
+Question 7
+
+```{r}
+diamonds %>%
+  count(clarity, color) %>%
+  ggplot(mapping = aes(y = clarity, x = color)) +
+  geom_tile(mapping = aes(fill = n))
+```
+
+Question 8
+
+```{r}
+diamonds %>%
+  group_by(clarity, color) %>%
+  summarise(med_price = median(price)) %>%
+  ggplot(mapping = aes(y = clarity, x = color)) +
+  geom_tile(mapping = aes(fill = med_price))
+```

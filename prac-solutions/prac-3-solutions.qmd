@@ -39,7 +39,7 @@ ggplot(mpg, aes(x = displ, y = hwy)) +
 ```{r}
 ggplot(mpg, aes(x = displ, y = hwy, color = drv)) +
   geom_point() +
-  geom_smooth(se = FALSE, aes(group = drv))
+  geom_smooth(se = FALSE)
 ```
 
 ```{r}
@@ -138,7 +138,7 @@ ggplot(diamonds, aes(x = cut, y = carat)) +
   geom_boxplot()
 ```
 
-There is a lot of variation in the distribution of `carat` sizes **within** each `cut` category. The plot reveals a slight negative relationship between carat and cut. It appears very similar to the original plot of `price` vs `cut`. Importantly, the largest carat diamonds have a cut of “Fair” (the lowest).
+There is a lot of variation in the distribution of `carat` sizes **within** each `cut` category. The plot reveals a slight negative relationship between carat and cut. It appears very similar to the original plot of `price` vs `cut`. Importantly, the largest carat diamonds have a cut of "Fair" (the lowest).
 
 In the diamond market, larger diamonds can be profitably sold with a lower quality cut, while a smaller diamond would require a better cut to be sold at a better price.
 

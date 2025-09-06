@@ -1,0 +1,143 @@
+---
+title: "Practical 4"
+format: html
+editor: visual
+---
+
+## Setup/Preamble
+
+```{r}
+#| warning: false
+library(tidyverse)
+library(scales)
+library(patchwork)
+library(nycflights13)
+```
+
+## Section 1
+
+Question 1
+
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy, color = class)) +
+  geom_point() +
+  labs(
+    title = "Fuel Economy by Engine Size",
+    subtitle = "Larger engines are less fuel efficient on the highway",
+    caption = "Source: ggplot2::mpg dataset",
+    x = "Engine displacement (litres)",
+    y = "Highway miles per gallon",
+    color = "Vehicle class"
+  ) +
+  theme_bw()
+```
+
+Question 2
+
+```{r}
+ggplot(mpg, aes(x = cty, y = hwy, color = drv, shape = drv)) +
+  geom_point(size = 3) +
+  labs(
+    x = "City MPG",
+    y = "Highway MPG",
+    color = "Type of drive train",
+    shape = "Type of drive train"
+  )
+```
+
+Question 3
+
+```{r}
+p1 <- ggplot (mpg , aes(x = displ , y = hwy)) +
+        geom_point () +
+        labs (title = "Plot 1")
+p2 <- ggplot (mpg , aes(x = drv , y = hwy )) +
+        geom_boxplot () +
+        labs(title = "Plot 2")
+p3 <- ggplot(mpg , aes( x = cty , y = hwy )) +
+        geom_point () +
+        labs (title = "Plot 3")
+```
+
+```{r}
+# after running the code in the prac question to create the 3 plots
+p1 / (p2 + p3) +
+  plot_annotation(tag_levels = "A", tag_prefix = "Fig. ", tag_sep = ": ")
+```
+
+## Section 2
+
+Question 4
+
+```{r}
+flights |>
+    filter(is.na(dep_time))
+
+```
+
+Rows with missing departure times appear to also have missing arrival times. There are 8 255 rows with missing departure times. If we run the block below, we will see that all flights missing a departure time are also missing an arrival time. Perhaps these rows represent canceled flights?
+
+```{r}
+flights |>
+  mutate(
+    dep_time_missing = is.na(dep_time),
+    arr_time_missing = is.na(arr_time)
+  ) %>%
+  count(dep_time_missing, arr_time_missing)
+```
+
+Question 5
+
+```{r}
+flights |>
+  group_by(hour) |>
+  summarise(mean_delay = mean(dep_delay, na.rm = TRUE)) |>
+  arrange(mean_delay)
+```
+
+The earliest flights have the lowest mean departure delay.
+
+Question 6
+
+```{r}
+flights |>
+  mutate(dep_period = case_when(
+            dep_time >= 500 & dep_time < 1200 ~ "morning",
+            dep_time >= 1200 & dep_time < 1800 ~ "afternoon",
+            dep_time >= 1800 & dep_time < 2200 ~ "evening",
+            TRUE ~ "late night"
+         )) |>
+  group_by(dep_period) |>
+  summarise(mean_delay = mean(dep_delay, na.rm = TRUE))
+```
+
+Question 7
+
+```{r}
+flights |>
+  mutate(dep_period = ifelse(dep_time >= 500 & dep_time < 1200, "morning",
+                      ifelse(dep_time >= 1200 & dep_time < 1800, "afternoon",
+                      ifelse(dep_time >= 1800 & dep_time < 2200, "evening", "late night")))) |>
+  group_by(dep_period) |>
+  summarise(mean_delay = mean(dep_delay, na.rm = TRUE))
+```
+
+Question 8
+
+```{r}
+# Define breaks and labels
+breaks <- c(-Inf, 500, 1200, 1800, 2200, Inf)
+labels <- c("late night", "morning", "afternoon", "evening", "late night")
+
+# Create dep_period using cut()
+flights <- flights |>
+  mutate(dep_period = cut(dep_time, breaks = breaks, labels = labels, right = FALSE))
+
+# Notice: right = FALSE 
+# We do this so that the cut-off times are included in the correct bins.
+# Read the cut() documentation or search online to better understand this argument. 
+
+flights |>
+  group_by(dep_period) |>
+  summarise(mean_delay = mean(dep_delay, na.rm = TRUE))
+```

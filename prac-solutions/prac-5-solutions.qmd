@@ -1,0 +1,101 @@
+---
+title: "Practical 5"
+format: html
+editor: visual
+---
+
+## Setup/Preamble
+
+```{r}
+#| warning: false
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+library(tidyverse)
+# install.packages("babynames")
+library(babynames)
+```
+
+## Section 1
+
+Question 1
+
+```{r}
+str_c("hi ", NA) 
+# Returns NA by default
+paste0("hi ", NA)
+# Returns "hi NA"
+
+str_c(letters[1:2], letters[1:3])
+# Vector recycling: "a a" "b b" "a c" "b a"
+```
+
+Question 2
+
+```{r}
+paste("a", "b")   # adds a space by default -> "a b"
+paste0("a", "b")  # concatenates directly -> "ab"
+
+str_c("a", "b", sep = " ") # equivalent to paste()
+```
+
+Question 3
+
+```{r}
+str_glue("The price of {food} is {price}")
+str_c("I'm ", age, " years old and live in ", country)
+str_glue("\\section{{{section_num}}}")
+```
+
+Question 4
+
+```{r}
+tibble(txt = stringr::sentences) %>%
+  mutate(first = word(txt, 1),
+         last = word(txt, -1),
+         n_chars = str_length(txt))
+```
+
+Question 5
+
+```{r}
+str_to_lower("The Quick Brown Fox")
+str_to_upper("The Quick Brown Fox")
+str_to_title("the quick brown fox")
+# Lower: useful for normalization
+# Upper: useful for IDs, emphasis
+# Title: useful for names, titles
+```
+
+## Section 2
+
+Question 6
+
+```{r}
+babynames %>%
+  mutate(n = str_length(name),
+         middle = str_sub(name, (n + 1) %/% 2, (n + 1) %/% 2))
+
+# If even length: above chooses the left-middle letter
+```
+
+Question 7
+
+```{r}
+babynames %>%
+  mutate(len = str_length(name),
+         first = str_sub(name, 1, 1),
+         last = str_sub(name, -1)) %>%
+  group_by(year) %>%
+  summarise(avg_len = mean(len),
+            common_first = names(sort(table(first), decreasing = TRUE)[1]),
+            common_last = names(sort(table(last), decreasing = TRUE)[1]))
+```
+
+Question 8
+
+```{r}
+babynames %>%
+  mutate(prefix3 = str_sub(name, 1, 3)) %>%
+  count(prefix3) %>%
+  mutate(prop = n / sum(n)) %>%
+  arrange(desc(n))
+```

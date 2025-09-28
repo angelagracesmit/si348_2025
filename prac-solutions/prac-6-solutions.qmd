@@ -1,0 +1,100 @@
+---
+title: "Practical 6"
+format: html
+editor: visual
+---
+
+## Setup/Preamble
+
+```{r}
+#| warning: false
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+library(tidyverse)
+# install.packages("babynames")
+library(babynames)
+```
+
+## Section 1
+
+Question 1
+
+```{r}
+babynames %>%
+  mutate(vowels = str_count(tolower(name), "[aeiou]")) %>%
+  group_by(name) %>%
+  summarise(total_vowels = max(vowels)) %>%
+  arrange(desc(total_vowels)) %>%
+  slice_head(n = 1)
+```
+
+Question 2
+
+```{r}
+babynames %>%
+  mutate(
+    vowels = str_count(tolower(name), "[aeiou]"),
+    prop_vowels = vowels / str_length(name)
+  ) %>%
+  group_by(name) %>%
+  summarise(max_prop = max(prop_vowels)) %>%
+  arrange(desc(max_prop)) %>%
+  slice_head(n = 1)
+
+```
+
+## Section 2
+
+Question 3
+
+```{r}
+str_subset(stringr::words, "^y")
+str_subset(stringr::words, "^[^y]")
+str_subset(stringr::words, "x$")
+str_subset(stringr::words, "^...$")
+str_subset(stringr::words, "[aeiou][^aeiou]")
+str_subset(stringr::words, "(?:[aeiou][^aeiou]){2}")
+str_subset(stringr::words, "^([aeiou][^aeiou])+$")
+```
+
+## Section 3
+
+Question 4
+
+Invalid date strings are typically converted to NA, and a warning is usually generated indicating that some strings could not be parsed.
+
+Question 5
+
+It determines the time-zone of the date. Since different time-zones can have different dates, the value of `today()` can vary depending on the time-zone specified. By explicitly setting the time zone, you avoid ambiguity and ensure that the date-time is interpreted correctly regardless of the system or environment.
+
+Question 6
+
+-   `parse_date()` from **readr** requires a format string which you specify explicitly.
+
+-   `lubridate` functions like `ymd()`, `mdy()`, `dmy()` automatically guess the order based on the function name, making them easier to use.
+
+```{r}
+# d1
+d1 <- "January 1, 2010"
+parse_date(d1, format = "%B %d, %Y")   # readr
+mdy(d1)                                # lubridate
+
+# d2
+d2 <- "2015-Mar-07"
+parse_date(d2, format = "%Y-%b-%d")    # readr
+ymd(d2)                                # lubridate
+
+# d3
+d3 <- "06-Jun-2017"
+parse_date(d3, format = "%d-%b-%Y")    # readr
+dmy(d3)                                # lubridate
+
+# d4
+d4 <- c("August 19 (2015)", "July 1 (2015)")
+parse_date(d4, format = "%B %d (%Y)")  # readr
+mdy(d4)                                # lubridate
+
+# d5
+d5 <- "12/30/14"
+parse_date(d5, format = "%m/%d/%y")    # readr
+mdy(d5)                                # lubridate
+```

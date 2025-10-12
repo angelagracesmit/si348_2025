@@ -1,0 +1,94 @@
+---
+title: "Practical 8"
+format: html
+editor: visual
+---
+
+## Setup/Preamble
+
+```{r}
+#| warning: false
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+library(tidyverse)
+```
+
+## Section 1
+
+Question 1
+
+```{r}
+prop_na <- function(x) {
+  mean(is.na(x))
+}
+
+sum_to_one <- function(x, na.rm = FALSE) {
+  x / sum(x, na.rm = na.rm)
+}
+
+percentage_round <- function(x) {
+  round(x / sum(x, na.rm = TRUE) * 100, 1)
+}
+```
+
+Question 2
+
+```{r}
+compute_age <- function(birthdates) {
+  birthdates <- as.Date(birthdates)
+  age <- as.numeric(difftime(Sys.Date(), birthdates, units = "days")) / 365.25
+  return(floor(age))
+}
+
+```
+
+Question 3
+
+```{r}
+both_na <- function(vec1, vec2) {
+  if (length(vec1) != length(vec2)) {
+  stop("Both vectors must be of the same length.")
+  }
+  sum(is.na(vec1) & is.na(vec2))
+}
+```
+
+Question 4
+
+```{r}
+# Question 4.1
+filter_severe <- function(data) {
+  data |>
+  filter(is.na(arr_time) | dep_delay > 60 | arr_delay > 60)
+}
+
+flights |> filter_severe()
+```
+
+```{r}
+# Question 4.2
+filter_severe <- function(data, hours = 1) {
+  delay_threshold <- hours * 60
+  data |>
+  filter(is.na(arr_time) | dep_delay > delay_threshold |
+  arr_delay > delay_threshold)
+}
+
+flights |> filter_severe(hours = 2)
+```
+
+Question 5
+
+```{r}
+library(rvest)
+library(dplyr)
+
+url <- "https://en.wikipedia.org/wiki/List_of_largest_cities"
+
+webpage <- read_html(url)
+
+largest_cities_table <- webpage |>
+  html_node("table.wikitable") |>
+  html_table()
+
+head(largest_cities_table)
+```

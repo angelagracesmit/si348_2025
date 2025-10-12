@@ -1,0 +1,57 @@
+---
+title: "Practical 7"
+format: html
+editor: visual
+---
+
+## Setup/Preamble
+
+```{r}
+#| warning: false
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+library(tidyverse)
+library(nycflights13)
+```
+
+Question 1
+
+```{r}
+airports |>
+  left_join(weather, by = c("faa" = "origin"))
+```
+
+Question 2
+
+```{r}
+flights |>
+  group_by(tailnum) |>
+  summarise(
+    avg_dep_delay = mean(dep_delay, na.rm = TRUE),
+    avg_arr_delay = mean(arr_delay, na.rm = TRUE)
+  ) |>
+  pivot_longer(cols = c(avg_dep_delay, avg_arr_delay),
+  names_to = 'mode', values_to = 'delay') |>
+  left_join(planes, by = 'tailnum') |>
+  filter(if_all(c(year, delay), ~ !is.na(.))) |> #optional
+  ggplot(mapping = aes(x = year, y = delay)) +
+  geom_point() +
+  geom_smooth() +
+  facet_grid(.~mode)
+
+```
+
+Question 3
+
+```{r}
+flights |>
+  anti_join(planes, by = 'tailnum') |>
+  group_by(carrier) |>
+  summarize(n = n()) |>
+  arrange(desc(n))
+```
+
+Question 4
+
+Without `keep = TRUE`: keys with the same name are merged into a single column. Missing values show up as NA in that single column.
+
+With `keep = TRUE`: both original key columns are preserved, so you can see explicitly which side contributed the value. This is useful for diagnosing join behavior (e.g., spotting mismatches).

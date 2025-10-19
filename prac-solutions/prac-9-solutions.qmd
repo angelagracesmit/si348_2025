@@ -1,0 +1,60 @@
+---
+title: "Practical 9"
+format: html
+editor: visual
+---
+
+## Setup/Preamble
+
+```{r}
+#| warning: false
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+library(palmerpenguins)
+library(tidyverse)
+library(lubridate)
+```
+
+Question 1
+
+```{r}
+penguins |>
+    summarise(across(everything(), n_distinct))
+
+mtcars |>
+    summarise(across(everything(), \(x) mean(x, na.rm = TRUE)))
+
+diamonds |>
+    group_by(cut, clarity, color) |>
+    summarise(
+        n = n(),
+        across(where(is.numeric), mean, na.rm = TRUE),
+        .groups = "drop"
+    )
+```
+
+Question 2
+
+```{r}
+expand_dates <- function(df) {
+  df %>%
+    mutate(
+      across(where(is.Date), list(
+        year = year,
+        month = month,
+        day = mday
+      ), .names = "{.col}_{.fn}")
+    ) %>%
+    select(-where(is.Date))
+}
+
+```
+
+Question 3
+
+| Step | Purpose |
+|------------------------------------|------------------------------------|
+| `group_by(pick({{ group_vars }}))` | Group data by chosen variables |
+| `summarize(across(..., \(x) sum(is.na(x))))` | Count missing values per variable in each group |
+| `.groups = "drop"` | Return an ungrouped result |
+| `select(where(\(x) any(x > 0)))` | Keep only columns that have any missing values |
+| Special feature of **`where()`** | It can select columns dynamically based on the **values inside** them, not just type or specific column names |

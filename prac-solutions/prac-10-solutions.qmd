@@ -1,0 +1,192 @@
+---
+title: "Practical 10"
+format: html
+editor: visual
+---
+
+## Setup/Preamble
+
+```{r}
+#| warning: false
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+library(tidytext)
+library(textdata)
+library(tidyverse)
+library(janeaustenr)
+```
+
+Question 1
+
+```{r}
+text_data <- data.frame(
+  line = 1:6,
+  text = c("I love learning R programming",
+           "The tidyverse package is amazing",
+           "Sentiment analysis is fun!",
+           "R makes data wrangling easy",
+           "Text mining helps us understand language",
+           "Tokenization breaks text into meaningful units"),
+  author = c("Alice", "Bob", "Charlie", "Alice", "David", "Eve"),
+  date = c("2024-01-15", "2024-01-16", "2024-01-17", "2024-01-18",
+           "2024-01-19", "2024-01-20"),
+  source = c("Blog", "Twitter", "Research Paper", "Blog",
+             "News Article", "Twitter")
+)
+
+tidy_text <- text_data |>
+  unnest_tokens(word, text)
+
+print(tidy_text)
+```
+
+Question 2
+
+```{r}
+tidy_books <- austen_books() |>
+  unnest_tokens(word, text) |>
+  anti_join(stop_words)
+
+word_counts <- tidy_books |>
+  count(word, sort = TRUE)
+
+print(head(word_counts, 10))
+```
+
+Question 3
+
+```{r}
+# Load the tweets dataset
+load("prac-10/senator_tweets.RData") # Path to the RData file
+head(senator_tweet_sample)
+
+# Load the Bing sentiment lexicon
+bing_sentiments <- get_sentiments("bing")
+
+# Tokenize text
+tidy_tweets <- senator_tweet_sample |>
+  unnest_tokens(word, text)
+
+# Join with Bing sentiments
+sentiments <- tidy_tweets |>
+  inner_join(bing_sentiments, by = "word")
+
+# Count frequency and plot
+sentiments |>
+  count(screen_name, sentiment) |>
+  pivot_wider(names_from = sentiment, values_from = n) |>
+  mutate(diff = positive - negative) |>
+  filter(!is.na(diff)) |>
+  arrange(desc(diff)) |>
+  slice_max(diff, n = 30) |>
+  ggplot(aes(x = fct_reorder(screen_name, diff), y = diff)) +
+  geom_col() +
+  labs(x = "Senator", y = "Count", title = "Most negative senators") +
+  theme_minimal() +
+  coord_flip()
+```
+
+Question 4
+
+```{r}
+# Load the tweets dataset
+load("senator_tweets.RData")
+head(senator_tweet_sample)
+
+# Load the NRC sentiment lexicon
+nrc_sentiments <- get_sentiments("nrc")
+
+# Convert the tweet text data into tidy format
+tidy_tweets <- senator_tweet_sample |>
+  unnest_tokens(word, text)
+
+sentiments <- tidy_tweets |>
+  inner_join(nrc_sentiments, by = "word")
+
+# Compute daily sentiment scores for selected categories
+daily_sentiments <- sentiments |>
+  group_by(screen_name, created_at, sentiment) |>
+  count() |>
+  pivot_wider(names_from = sentiment, values_from = n,
+              values_fill = list(n = 0)) |>
+  mutate(score = positive - negative) |>
+  mutate(day = as.Date(created_at)) |>
+  group_by(day) |>
+  summarise(score = sum(score)) |>
+  arrange(desc(day))
+
+# Plot the sentiment trends over time
+ggplot(daily_sentiments, aes(x = day, y = score, color = score < 0)) +
+  geom_line() +
+  labs(x = "Date", y = "Sentiment Score",
+       title = "Sentiment Trends Over Time by Senator") +
+  theme_minimal()
+
+# OR, alternative interpretation
+sentiments |>
+  group_by(screen_name, created_at, sentiment) |>
+  count() |>
+  mutate(day = as.Date(created_at)) |>
+  group_by(day, sentiment) |>
+  summarise(total = sum(n)) |>
+  ggplot(aes(x = day, y = total, color = sentiment)) +
+  geom_line() +
+  labs(x = "Date", y = "Sentiment Score",
+       title = "Sentiment Trends Over Time by Senator") +
+  theme_minimal() +
+  facet_wrap(~sentiment, ncol = 2)
+```
+
+Question 5
+
+```{r}
+# Load Jane Austen texts
+austen_books <- austen_books()
+
+# Convert the text data into tidy format
+tidy_austen <- austen_books() |>
+  unnest_tokens(word, text) |>
+  anti_join(stop_words) |>
+  count(book, word, sort = TRUE)
+
+# Visualise the most frequent words
+tidy_austen |>
+  group_by(book) |>
+  top_n(5) |>
+  ungroup() |>
+  ggplot(aes(x = reorder_within(word, n, book), y = n, fill = book)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  scale_x_reordered() +
+  labs(x = "Word", y = "Count",
+       title = "Top 5 Words in each Jane Austen Book") +
+  theme_minimal() +
+  facet_wrap(~book, scales = "free")
+```
+
+Question 6
+
+```{r}
+# Load Jane Austen texts
+austen_books <- austen_books()
+
+# Convert the text data into tidy format
+tidy_austen <- austen_books() |>
+  unnest_tokens(word, text) |>
+  anti_join(stop_words) |>
+  count(book, word, sort = TRUE) |>
+  bind_tf_idf(word, book, n)
+
+# Identify and visualize the most distinctive words in each book
+tidy_austen |>
+  group_by(book) |>
+  top_n(5, tf_idf) |>
+  ungroup() |>
+  ggplot(aes(x = reorder_within(word, tf_idf, book), y = tf_idf, fill = book)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  scale_x_reordered() +
+  labs(x = "Word", y = "TF-IDF",
+       title = "Top 5 Distinctive Words in Jane Austen Books") +
+  theme_minimal() +
+  facet_wrap(~book, scales = "free")
+```
